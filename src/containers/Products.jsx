@@ -8,6 +8,10 @@ import API from '../utils/API';
 import { Container, TextField } from '@mui/material';
 import EntityModal from '../components/EntityModal';
 import { paths } from '../router/paths';
+import { isAxiosError } from 'axios';
+import { toast } from 'react-toastify';
+import { Pagination } from '@mui/material';
+
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -24,7 +28,7 @@ const Products = () => {
 
   const handleEdit = async (entityData) => {
     try {
-      const url = `${product}/${selected._id}`;
+      const url = `product/${selected._id}`;
       await API.patch(url, entityData);
       fetchEntities();
       setEntityModalOpen(false);
@@ -34,13 +38,13 @@ const Products = () => {
     } catch (error) {
       if (isAxiosError(error)) {
         if (error.response.status === 400) {
-          toast.error('Error: ' + error.response.data.message);
+          toast.error('Error:1 ' + error.response.data.message);
         }
         if (error.response.status === 500) {
-          toast.error('Error: ' + error.response.data.message);
+          toast.error('Error:2 ' + error.response.data.message);
         }
       }
-      toast.error('Error: ' + error.message);
+      toast.error('Error:3 ' + error.message);
     }
   };
 
@@ -77,19 +81,21 @@ const Products = () => {
     setSelected(entityItem);
   };
 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
   const fetchEntities = async () => {
     setLoading(true);
     try {
-      const catUrl = `/category/${storeId}`;
-      const url = `/product/store/${storeId}/category/${
-        categorySelected || 'allProducts'
-      }`;
-      const newResponse = await API.get(catUrl);
-      const newData = newResponse.data;
-      setCategories(newData);
+      const url = `${
+        import.meta.env.VITE_API_URL
+      }/product/store/${storeId}/category/${
+        categorySelected ? categorySelected : 'allProducts'
+      }?page=${page}&limit=${limit}`;
       const response = await API.get(url);
-      const data = response.data;
-      setProducts(data);
+      const { products, totalPages } = response.data;
+      setProducts(products);
+      setTotalPages(totalPages);
       setTimeout(() => {
         setLoading(false);
         setError(null);
@@ -100,10 +106,8 @@ const Products = () => {
     }
   };
   return (
-    console.log(categories),
-    (
-      <>
-        {/* {/* <ConfirmationDialog
+    <>
+      {/* {/* <ConfirmationDialog
         open={deleteModal}
         setOpen={setDeleteModal}
         title='Eliminar'
@@ -112,133 +116,139 @@ const Products = () => {
         onClose={() => setDeleteModal(false)}
       /> */}
 
-        <TextField
-          placeholder=''
-          select
-          name=''
-          onChange={(e) => setCategorySelected(e.target.value)}
-          SelectProps={{
-            native: true,
-          }}
-        >
-          <option value='allProducts'>Selecciona una categoría</option>
-          {categories?.map((option) => (
-            <option key={option._id} value={option._id}>
-              {option.name}
-            </option>
-          ))}
-        </TextField>
-        <EntityModal
-          entityModalOpen={entityModalOpen}
-          setEntityModalOpen={setEntityModalOpen}
-          entity={[
-            {
-              id: 'name',
-              label: 'Name',
-              label: 'Nombre',
-              type: 'text',
-              editable: true,
-              isHeader: true,
-              shouldRenderOnAdd: true,
-              shouldRenderOnEdit: true,
-              isEditable: true,
-            },
-            {
-              id: 'description',
-              label: 'Description',
-              editable: true,
-              type: 'text',
+      <TextField
+        placeholder=''
+        select
+        name=''
+        onChange={(e) => setCategorySelected(e.target.value)}
+        SelectProps={{
+          native: true,
+        }}
+      >
+        <option value='allProducts'>Selecciona una categoría</option>
+        {categories?.map((option) => (
+          <option key={option._id} value={option._id}>
+            {option.name}
+          </option>
+        ))}
+      </TextField>
+      <EntityModal
+        entityModalOpen={entityModalOpen}
+        setEntityModalOpen={setEntityModalOpen}
+        entity={[
+          {
+            id: 'name',
+            label: 'Nombresss',
+            type: 'text',
+            editable: true,
+            isHeader: true,
+            shouldRenderOnAdd: true,
+            shouldRenderOnEdit: true,
+            isEditable: true,
+          },
+          {
+            id: 'description',
+            label: 'Description',
+            editable: true,
+            type: 'text',
 
-              isHeader: false,
-              shouldRenderOnAdd: true,
-            },
-            {
-              id: 'price',
-              type: 'text',
+            isHeader: false,
+            shouldRenderOnAdd: true,
+          },
+          {
+            id: 'price',
+            type: 'text',
 
-              label: 'Price',
-              isHeader: true,
-              shouldRenderOnAdd: true,
-              editable: true,
-            },
-            {
-              id: 'categoryId',
-              label: 'Category',
-              isHeader: true,
-              editable: true,
-              options: categories,
-              shouldRenderOnAdd: true,
-            },
-            {
-              id: 'image',
-              editable: true,
-              label: 'Image',
-              isHeader: true,
-              shouldRenderOnAdd: true,
-            },
+            label: 'Price',
+            isHeader: true,
+            shouldRenderOnAdd: true,
+            editable: true,
+          },
+          {
+            id: 'categoryId',
+            label: 'Category',
+            isHeader: true,
+            editable: true,
+            options: categories,
+            shouldRenderOnAdd: true,
+          },
+          {
+            id: 'image',
+            editable: true,
+            label: 'Image',
+            isHeader: true,
+            shouldRenderOnAdd: true,
+          },
 
-            { id: '_id', label: 'ID' },
-            ,
-          ]}
-          entityName={'Product'}
-          entityData={selected}
-          onSave={handleSave}
-          onEdit={handleEdit}
-          editing={editing}
-        />
-        <Container
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexDirection: 'column',
-            textAlign: 'center',
-            height: '10vh',
-          }}
-        >
-          <h1 style={{ textTransform: 'capitalize' }}>{name}</h1>
-        </Container>
-        <MainTable
-          entities={products}
-          headers={[
-            { id: 'name', label: 'Name', editable: false, isHeader: true },
-            {
-              id: 'description',
-              label: 'Description',
-              editable: true,
-              isHeader: false,
-            },
-            {
-              id: 'category.name',
-              label: 'Category',
-              isHeader: true,
-              editable: true,
-              options: categories,
-              shouldRenderOnAdd: true,
-            },
-            { id: 'price', label: 'Price', isHeader: true },
-            { id: '_id', label: 'ID' },
-          ]}
-          entity={'product'}
-          loading={loading}
-          error={error}
-          selected={selected}
-          handleRowClick={handleRowClick}
-        />
-        <Buttons
-          canApplyToOwnStore={false}
-          handleDelete={setDeleteModal}
-          roles={roles}
-          selected={selected}
-          setEditing={setEditing}
-          // handleApply={handleApply}
-          setEntityModalOpen={setEntityModalOpen}
-          setSelected={setSelected}
-          storeId={storeId}
-        />
-        {/* </Container> */}
-      </>
-    )
+          { id: '_id', label: 'ID' },
+          ,
+        ]}
+        entityName={'Product'}
+        entityData={selected}
+        onSave={handleSave}
+        onEdit={handleEdit}
+        editing={editing}
+      />
+      <Container
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'column',
+          textAlign: 'center',
+          height: '10vh',
+        }}
+      >
+        <h1 style={{ textTransform: 'capitalize' }}>{name}</h1>
+      </Container>
+      <Pagination
+        count={totalPages}
+        page={page}
+        onChange={(event, value) => {
+          setPage(value);
+          fetchEntities();
+        }}
+      />
+      <MainTable
+        entities={products}
+        headers={[
+          { id: 'name', label: 'Name', editable: false, isHeader: true },
+          {
+            id: 'description',
+            label: 'Description',
+            editable: true,
+            isHeader: false,
+          },
+          {
+            id: 'category.name',
+            label: 'Category',
+            isHeader: true,
+            editable: true,
+            options: categories,
+            shouldRenderOnAdd: true,
+          },
+          { id: 'price', label: 'Price', isHeader: true },
+          { id: '_id', label: 'ID' },
+        ]}
+        entity={'product'}
+        loading={loading}
+        error={error}
+        selected={selected}
+        handleRowClick={handleRowClick}
+      />
+      <Buttons
+        canApplyToOwnStore={false}
+        handleDelete={setDeleteModal}
+        roles={roles}
+        selected={selected}
+        setEditing={setEditing}
+        // handleApply={handleApply}
+        setEntityModalOpen={setEntityModalOpen}
+        setSelected={setSelected}
+        storeId={storeId}
+      />
+      {/* </Container> */}
+    </>
   );
 };
 

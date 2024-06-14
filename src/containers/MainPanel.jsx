@@ -43,6 +43,10 @@ const MainPanel = ({ entity, name, headers }) => {
     }
   };
 
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+
   const handleDelete = async () => {
     try {
       const url = `${entity}/${selected._id}`;
@@ -91,12 +95,13 @@ const MainPanel = ({ entity, name, headers }) => {
   const fetchEntities = async () => {
     setLoading(true);
     try {
-      const url = `${import.meta.env.VITE_API_URL}/${entity}/${
-        entity === 'category' ? storeId : ''
-      }`;
+      const url = `${
+        import.meta.env.VITE_API_URL
+      }/${entity}?page=${page}&limit=${limit}`;
       const response = await API.get(url);
-      const data = response.data;
+      const { data, totalPages } = response.data;
       setEntities(data);
+      setTotalPages(totalPages);
       setTimeout(() => {
         setLoading(false);
         setError(null);

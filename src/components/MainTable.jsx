@@ -53,7 +53,12 @@ const MainTable = ({
         <TableBody>
           {loading && (
             <TableRow>
-              <TableCell align='center' colSpan={headers[entity]?.length}>
+              <TableCell
+                align='center'
+                colSpan={
+                  (headers[entity]?.length && headers[entity]?.length) || 0
+                }
+              >
                 <CircularProgress size={30} />
               </TableCell>
             </TableRow>
@@ -71,7 +76,7 @@ const MainTable = ({
           )}
           {!loading &&
             !error &&
-            entities.length &&
+            entities?.length &&
             entities?.map((entityItem) => (
               <TableRow
                 key={entityItem._id}

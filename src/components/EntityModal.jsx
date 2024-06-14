@@ -162,7 +162,6 @@ const EntityModal = ({
       });
     }
   }, [entityData]);
-  const { errors } = formState;
 
   const onSubmit = (data) => {
     if (editing) {
@@ -198,7 +197,6 @@ const EntityModal = ({
             console.log('Boolean(!attribute.shouldRenderOnAdd)');
             console.log(attribute);
             if (!editing) if (!attribute.shouldRenderOnAdd) return null;
-            console.log('llegué acá alñ menos');
             return (
               <Controller
                 key={attribute.id}
@@ -231,12 +229,6 @@ const EntityModal = ({
                 type='submit'
                 variant='contained'
                 color={editing ? 'secondary' : 'primary'}
-                sx={
-                  {
-                    // width: '50%',
-                    // marginBottom: '20px',
-                  }
-                }
               >
                 {editing ? 'Actualizar' : 'Agregar'}
               </Button>

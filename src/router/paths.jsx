@@ -274,7 +274,7 @@ export const paths = [
     id: 'categories',
     path: '/categories',
     name: 'Categorias',
-    accessible: ['storeAdmin'],
+    accessible: ['storeAdmin', 'superAdmin'],
     entity: 'category',
     crud: true,
     showInSidebar: true,
